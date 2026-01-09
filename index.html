@@ -26,6 +26,7 @@ button{
   cursor:pointer;
   width:100%;
   margin-top:10px;
+  font-size:16px;
 }
 pre{
   background:#111;
@@ -49,17 +50,18 @@ pre{
 function gerar(){
 
   let texto = document.getElementById("texto").value.trim();
+  let blocos = dividirTexto(texto, 350); // tamanho do bloco
 
-  let blocos = dividirTexto(texto, 500);
-
-  let tempo = 0;
+  let tempoAtual = 0;
   let srt = "";
 
   blocos.forEach((p,i)=>{
 
-    let ini = formatar(tempo);
-    tempo += 30;
-    let fim = formatar(tempo);
+    let duracao = calcularTempo(p);
+
+    let ini = formatar(tempoAtual);
+    tempoAtual += duracao;
+    let fim = formatar(tempoAtual);
 
     srt += (i+1) + "\n";
     srt += ini + " --> " + fim + "\n";
@@ -81,6 +83,12 @@ function dividirTexto(texto, limite){
   }
 
   return partes;
+}
+
+function calcularTempo(texto){
+  let velocidade = 15; // caracteres por segundo
+  let segundos = texto.length / velocidade;
+  return Math.ceil(segundos);
 }
 
 function formatar(s){
