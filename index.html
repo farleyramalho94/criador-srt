@@ -25,6 +25,7 @@ button{
   border:none;
   cursor:pointer;
   margin-top:10px;
+  font-size:15px;
 }
 #resultadoBox{
   margin-top:20px;
@@ -47,7 +48,7 @@ pre{
 
 <textarea id="texto" placeholder="Cole seu texto aqui..."></textarea>
 
-<button onclick="gerar()">Gerar SRT</button>
+<button onclick="gerar()">GERAR SRT</button>
 
 <div id="resultadoBox" style="display:none;">
 
@@ -66,7 +67,8 @@ pre{
 function gerar(){
 
   let texto = document.getElementById("texto").value.trim();
-  let blocos = dividirTexto(texto, 350);
+
+  let blocos = dividirTexto(texto, 350); // tamanho ideal
 
   let tempoAtual = 0;
   let srt = "";
@@ -106,6 +108,7 @@ function baixar(){
   link.click();
 }
 
+/* DIVISÃO INTELIGENTE */
 function dividirTexto(texto, limite){
 
   let partes = [];
@@ -116,7 +119,7 @@ function dividirTexto(texto, limite){
     let fim = inicio + limite;
 
     if(fim >= texto.length){
-      partes.push(texto.slice(inicio));
+      partes.push(texto.slice(inicio).trim());
       break;
     }
 
@@ -133,7 +136,7 @@ function dividirTexto(texto, limite){
 }
 
 function calcularTempo(texto){
-  let velocidade = 15;
+  let velocidade = 15; // caracteres por segundo
   let segundos = texto.length / velocidade;
   return Math.ceil(segundos);
 }
