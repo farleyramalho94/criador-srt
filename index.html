@@ -112,8 +112,21 @@ function dividirTexto(texto, limite){
   let inicio = 0;
 
   while(inicio < texto.length){
-    partes.push(texto.slice(inicio, inicio + limite));
-    inicio += limite;
+
+    let fim = inicio + limite;
+
+    if(fim >= texto.length){
+      partes.push(texto.slice(inicio));
+      break;
+    }
+
+    // volta até achar espaço ou pontuação
+    while(fim > inicio && !/[\.!\?\s]/.test(texto[fim])){
+      fim--;
+    }
+
+    partes.push(texto.slice(inicio, fim).trim());
+    inicio = fim;
   }
 
   return partes;
