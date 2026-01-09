@@ -64,11 +64,12 @@ pre{
 </div>
 
 <script>
+
 function gerar(){
 
   let texto = document.getElementById("texto").value.trim();
 
-  let blocos = dividirTexto(texto, 350); // tamanho ideal
+  let blocos = dividirPorFrases(texto, 350);
 
   let tempoAtual = 0;
   let srt = "";
@@ -108,31 +109,31 @@ function baixar(){
   link.click();
 }
 
-/* DIVISÃO INTELIGENTE */
-function dividirTexto(texto, limite){
+/* 🔥 MÉTODO PROFISSIONAL */
+function dividirPorFrases(texto, limite){
 
-  let partes = [];
-  let inicio = 0;
+  // separa por pontuação
+  let frases = texto.match(/[^\.!\?]+[\.!\?]+/g) || [texto];
 
-  while(inicio < texto.length){
+  let blocos = [];
+  let atual = "";
 
-    let fim = inicio + limite;
+  frases.forEach(frase=>{
 
-    if(fim >= texto.length){
-      partes.push(texto.slice(inicio).trim());
-      break;
+    if((atual + frase).length <= limite){
+      atual += frase;
+    }else{
+      blocos.push(atual.trim());
+      atual = frase;
     }
 
-    // volta até achar espaço ou pontuação
-    while(fim > inicio && !/[\.!\?\s]/.test(texto[fim])){
-      fim--;
-    }
+  });
 
-    partes.push(texto.slice(inicio, fim).trim());
-    inicio = fim;
+  if(atual){
+    blocos.push(atual.trim());
   }
 
-  return partes;
+  return blocos;
 }
 
 function calcularTempo(texto){
@@ -149,6 +150,7 @@ function formatar(s){
 
  return `${h}:${m}:${sec},000`;
 }
+
 </script>
 
 </body>
