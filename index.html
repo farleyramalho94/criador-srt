@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Criador de SRT</title>
+
+<style>
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+  padding:30px;
+}
+textarea{
+  width:100%;
+  height:200px;
+  background:#111;
+  color:#fff;
+  padding:10px;
+}
+button{
+  background:red;
+  color:white;
+  padding:15px;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  margin-top:10px;
+}
+pre{
+  background:#111;
+  padding:15px;
+  white-space:pre-wrap;
+}
+</style>
+
+</head>
+<body>
+
+<h2>Criador de Legendas SRT</h2>
+
+<textarea id="texto" placeholder="Cole seu texto aqui..."></textarea>
+
+<button onclick="gerar()">Gerar SRT</button>
+
+<pre id="resultado"></pre>
+
+<script>
+function gerar(){
+
+  let texto = document.getElementById("texto").value.trim();
+
+  let blocos = dividirTexto(texto, 500);
+
+  let tempo = 0;
+  let srt = "";
+
+  blocos.forEach((p,i)=>{
+
+    let ini = formatar(tempo);
+    tempo += 30;
+    let fim = formatar(tempo);
+
+    srt += (i+1) + "\n";
+    srt += ini + " --> " + fim + "\n";
+    srt += p + "\n\n";
+
+  });
+
+  document.getElementById("resultado").textContent = srt;
+}
+
+function dividirTexto(texto, limite){
+
+  let partes = [];
+  let inicio = 0;
+
+  while(inicio < texto.length){
+    partes.push(texto.slice(inicio, inicio + limite));
+    inicio += limite;
+  }
+
+  return partes;
+}
+
+function formatar(s){
+
+ let h = String(Math.floor(s/3600)).padStart(2,"0");
+ let m = String(Math.floor(s%3600/60)).padStart(2,"0");
+ let sec = String(s%60).padStart(2,"0");
+
+ return `${h}:${m}:${sec},000`;
+}
+</script>
+
+</body>
+</html>
