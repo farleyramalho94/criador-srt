@@ -1,156 +1,148 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Criador de SRT</title>
+<title>Conversor SRT Profissional</title>
 
 <style>
 body{
-  background:#000;
-  color:#fff;
-  font-family:Arial;
-  padding:30px;
+font-family:Arial;
+background:#0f172a;
+color:#fff;
+padding:30px;
+max-width:900px;
+margin:auto;
 }
+
 textarea{
-  width:100%;
-  height:200px;
-  background:#111;
-  color:#fff;
-  padding:10px;
+width:100%;
+height:260px;
+padding:15px;
+border-radius:8px;
+font-size:15px;
 }
+
 button{
-  background:red;
-  color:white;
-  padding:12px;
-  border:none;
-  cursor:pointer;
-  margin-top:10px;
-  font-size:15px;
+background:#22c55e;
+color:#000;
+border:none;
+padding:12px 25px;
+border-radius:8px;
+font-size:15px;
+cursor:pointer;
+margin:10px 5px 0 0;
 }
-#resultadoBox{
-  margin-top:20px;
-}
+
 pre{
-  background:#111;
-  padding:15px;
-  white-space:pre-wrap;
+background:#020617;
+padding:15px;
+white-space:pre-wrap;
+border-radius:8px;
+margin-top:20px;
 }
-.botoes{
-  display:flex;
-  gap:10px;
+
+.footer{
+text-align:center;
+margin-top:40px;
+opacity:0.6;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Criador de Legendas SRT</h2>
+<h2>Conversor de Texto para SRT (CapCut)</h2>
 
-<textarea id="texto" placeholder="Cole seu texto aqui..."></textarea>
+<textarea id="texto" placeholder="Cole seu roteiro aqui..."></textarea>
+<br>
+<button onclick="gerarSRT()">GERAR SRT</button>
 
-<button onclick="gerar()">GERAR SRT</button>
+<h3>Resultado (.srt)</h3>
 
-<div id="resultadoBox" style="display:none;">
-
-<h3>Resultado (.srt):</h3>
-
-<div class="botoes">
-  <button onclick="copiar()">Copiar texto</button>
-  <button onclick="baixar()">Baixar .srt</button>
-</div>
+<button onclick="copiar()">Copiar texto</button>
+<button onclick="baixar()">Baixar .srt</button>
 
 <pre id="resultado"></pre>
 
+<div class="footer">
+Desenvolvido por Farley Ramalho
 </div>
 
 <script>
+let srtFinal="";
 
-function gerar(){
+function gerarSRT(){
 
-  let texto = document.getElementById("texto").value.trim();
+let texto = document.getElementById("texto").value
+.replace(/\s+/g," ")
+.trim();
 
-  let blocos = dividirPorFrases(texto, 350);
+let frases = texto.match(/[^.!?…"]+["”]?([.!?…"]+)?/g);
 
-  let tempoAtual = 0;
-  let srt = "";
+let blocos=[];
+let atual="";
 
-  blocos.forEach((p,i)=>{
+for(let f of frases){
 
-    let duracao = calcularTempo(p);
+if((atual+f).length<=450){
+atual+=f+" ";
+}else{
+blocos.push(atual.trim());
+atual=f+" ";
+}
+}
 
-    let ini = formatar(tempoAtual);
-    tempoAtual += duracao;
-    let fim = formatar(tempoAtual);
+if(atual.trim()!=""){
+blocos.push(atual.trim());
+}
 
-    srt += (i+1) + "\n";
-    srt += ini + " --> " + fim + "\n";
-    srt += p + "\n\n";
+let tempoInicio=0;
 
-  });
+let duracao=32; // tempo de leitura
+let pausa=10;   // espaço entre áudios
 
-  document.getElementById("resultado").textContent = srt;
-  document.getElementById("resultadoBox").style.display = "block";
+let srt="";
+let i=1;
+
+for(let b of blocos){
+
+let inicio=formatarTempo(tempoInicio);
+let fim=formatarTempo(tempoInicio+duracao);
+
+srt+=`${i}\n${inicio} --> ${fim}\n${b}\n\n`;
+
+tempoInicio+=duracao+pausa;
+i++;
+}
+
+srtFinal=srt;
+document.getElementById("resultado").textContent=srt;
+}
+
+function formatarTempo(seg){
+let h=Math.floor(seg/3600);
+let m=Math.floor((seg%3600)/60);
+let s=Math.floor(seg%60);
+
+return `${pad(h)}:${pad(m)}:${pad(s)},000`;
+}
+
+function pad(n){
+return n<10?"0"+n:n;
 }
 
 function copiar(){
-  let texto = document.getElementById("resultado").textContent;
-  navigator.clipboard.writeText(texto);
-  alert("Texto copiado!");
+navigator.clipboard.writeText(srtFinal);
+alert("SRT copiado!");
 }
 
 function baixar(){
-  let texto = document.getElementById("resultado").textContent;
-
-  let blob = new Blob([texto], {type:"text/plain"});
-  let link = document.createElement("a");
-
-  link.href = URL.createObjectURL(blob);
-  link.download = "legenda.srt";
-  link.click();
+let blob = new Blob([srtFinal], {type:"text/plain"});
+let link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.download = "legendas.srt";
+link.click();
 }
-
-/* 🔥 MÉTODO PROFISSIONAL */
-function dividirPorFrases(texto, limite){
-
-  // separa por pontuação
-  let frases = texto.match(/[^\.!\?]+[\.!\?]+/g) || [texto];
-
-  let blocos = [];
-  let atual = "";
-
-  frases.forEach(frase=>{
-
-    if((atual + frase).length <= limite){
-      atual += frase;
-    }else{
-      blocos.push(atual.trim());
-      atual = frase;
-    }
-
-  });
-
-  if(atual){
-    blocos.push(atual.trim());
-  }
-
-  return blocos;
-}
-
-function calcularTempo(texto){
-  let velocidade = 15; // caracteres por segundo
-  let segundos = texto.length / velocidade;
-  return Math.ceil(segundos);
-}
-
-function formatar(s){
-
- let h = String(Math.floor(s/3600)).padStart(2,"0");
- let m = String(Math.floor(s%3600/60)).padStart(2,"0");
- let sec = String(s%60).padStart(2,"0");
-
- return `${h}:${m}:${sec},000`;
-}
-
 </script>
 
 </body>
