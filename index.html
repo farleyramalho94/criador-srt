@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Criador de SRT</title>
+<title>Conversor SRT - Áudio Único</title>
 
 <style>
 body{
@@ -13,7 +13,7 @@ body{
 }
 textarea{
   width:100%;
-  height:200px;
+  height:220px;
   background:#111;
   color:#fff;
   padding:10px;
@@ -44,9 +44,11 @@ pre{
 
 <body>
 
-<h2>Criador de Legendas SRT</h2>
+<h2>Conversor SRT - Áudio Único</h2>
 
-<textarea id="texto" placeholder="Cole seu texto aqui..."></textarea>
+<p>Cole TODO o roteiro abaixo:</p>
+
+<textarea id="texto" placeholder="Cole seu roteiro aqui..."></textarea>
 
 <button onclick="gerar()">GERAR SRT</button>
 
@@ -69,24 +71,18 @@ function gerar(){
 
   let texto = document.getElementById("texto").value.trim();
 
-  let blocos = dividirPorFrases(texto, 350);
+  if(texto.length < 5){
+    alert("Cole um texto primeiro!");
+    return;
+  }
 
-  let tempoAtual = 0;
+  let duracao = calcularTempo(texto);
+
   let srt = "";
 
-  blocos.forEach((p,i)=>{
-
-    let duracao = calcularTempo(p);
-
-    let ini = formatar(tempoAtual);
-    tempoAtual += duracao;
-    let fim = formatar(tempoAtual);
-
-    srt += (i+1) + "\n";
-    srt += ini + " --> " + fim + "\n";
-    srt += p + "\n\n";
-
-  });
+  srt += "1\n";
+  srt += "00:00:00,000 --> " + formatar(duracao) + "\n";
+  srt += texto + "\n";
 
   document.getElementById("resultado").textContent = srt;
   document.getElementById("resultadoBox").style.display = "block";
@@ -109,35 +105,8 @@ function baixar(){
   link.click();
 }
 
-/* 🔥 MÉTODO PROFISSIONAL */
-function dividirPorFrases(texto, limite){
-
-  // separa por pontuação
-  let frases = texto.match(/[^\.!\?]+[\.!\?]+/g) || [texto];
-
-  let blocos = [];
-  let atual = "";
-
-  frases.forEach(frase=>{
-
-    if((atual + frase).length <= limite){
-      atual += frase;
-    }else{
-      blocos.push(atual.trim());
-      atual = frase;
-    }
-
-  });
-
-  if(atual){
-    blocos.push(atual.trim());
-  }
-
-  return blocos;
-}
-
 function calcularTempo(texto){
-  let velocidade = 15; // caracteres por segundo
+  let velocidade = 14; // caracteres por segundo (voz natural)
   let segundos = texto.length / velocidade;
   return Math.ceil(segundos);
 }
