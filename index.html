@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Conversor SRT - Áudio Único</title>
+<title>Conversor SRT Profissional</title>
 
 <style>
 body{
@@ -44,82 +44,100 @@ pre{
 
 <body>
 
-<h2>Conversor SRT - Áudio Único</h2>
+<h2>Conversor SRT (Áudio Contínuo)</h2>
 
-<p>Cole TODO o roteiro abaixo:</p>
-
-<textarea id="texto" placeholder="Cole seu roteiro aqui..."></textarea>
+<textarea id="texto" placeholder="Cole seu roteiro..."></textarea>
 
 <button onclick="gerar()">GERAR SRT</button>
 
 <div id="resultadoBox" style="display:none;">
-
-<h3>Resultado (.srt):</h3>
+<h3>Resultado (.srt)</h3>
 
 <div class="botoes">
-  <button onclick="copiar()">Copiar texto</button>
-  <button onclick="baixar()">Baixar .srt</button>
+<button onclick="copiar()">Copiar</button>
+<button onclick="baixar()">Baixar</button>
 </div>
 
 <pre id="resultado"></pre>
-
 </div>
 
 <script>
 
 function gerar(){
 
-  let texto = document.getElementById("texto").value.trim();
+let texto = document.getElementById("texto").value.trim();
+let partes = dividir(texto, 480); // respeita limite
 
-  if(texto.length < 5){
-    alert("Cole um texto primeiro!");
-    return;
-  }
+let tempo = 0;
+let srt = "";
 
-  let duracao = calcularTempo(texto);
+partes.forEach((p,i)=>{
 
-  let srt = "";
+let dur = tempoDeLeitura(p);
 
-  srt += "1\n";
-  srt += "00:00:00,000 --> " + formatar(duracao) + "\n";
-  srt += texto + "\n";
+let inicio = formatar(tempo);
+let fim = formatar(tempo + dur);
 
-  document.getElementById("resultado").textContent = srt;
-  document.getElementById("resultadoBox").style.display = "block";
+srt += (i+1) + "\n";
+srt += inicio + " --> " + fim + "\n";
+srt += p + "\n\n";
+
+tempo += dur; // ENCadeamento perfeito
+});
+
+document.getElementById("resultado").textContent = srt;
+document.getElementById("resultadoBox").style.display = "block";
 }
 
-function copiar(){
-  let texto = document.getElementById("resultado").textContent;
-  navigator.clipboard.writeText(texto);
-  alert("Texto copiado!");
+function dividir(txt, lim){
+
+let palavras = txt.split(" ");
+let blocos = [];
+let atual = "";
+
+palavras.forEach(p=>{
+
+if((atual+p).length <= lim){
+ atual += p+" ";
+}else{
+ blocos.push(atual.trim());
+ atual = p+" ";
+}
+});
+
+if(atual) blocos.push(atual.trim());
+return blocos;
 }
 
-function baixar(){
-  let texto = document.getElementById("resultado").textContent;
-
-  let blob = new Blob([texto], {type:"text/plain"});
-  let link = document.createElement("a");
-
-  link.href = URL.createObjectURL(blob);
-  link.download = "legenda.srt";
-  link.click();
-}
-
-function calcularTempo(texto){
-  let velocidade = 14; // caracteres por segundo (voz natural)
-  let segundos = texto.length / velocidade;
-  return Math.ceil(segundos);
+function tempoDeLeitura(t){
+return Math.ceil(t.length / 13); // fala natural
 }
 
 function formatar(s){
 
- let h = String(Math.floor(s/3600)).padStart(2,"0");
- let m = String(Math.floor(s%3600/60)).padStart(2,"0");
- let sec = String(s%60).padStart(2,"0");
+let h = String(Math.floor(s/3600)).padStart(2,"0");
+let m = String(Math.floor(s%3600/60)).padStart(2,"0");
+let sec = String(s%60).padStart(2,"0");
 
- return `${h}:${m}:${sec},000`;
+return `${h}:${m}:${sec},000`;
 }
 
+function copiar(){
+navigator.clipboard.writeText(
+document.getElementById("resultado").textContent);
+alert("Copiado!");
+}
+
+function baixar(){
+let blob = new Blob(
+[document.getElementById("resultado").textContent],
+{type:"text/plain"});
+
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download="legenda.srt";
+a.click();
+}
 </script>
 
 </body>
